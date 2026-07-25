@@ -1,19 +1,27 @@
 import { GoogleGenAI } from '@google/genai';
 
-export default async function handler(req: any, res: any) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+export async function onRequestPost(context: any) {
+  const { request, env } = context;
+
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  // Support VITE_GEMINI_API_KEY (from local .env) or GEMINI_API_KEY (from Vercel dashboard)
-  const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  // Use the Cloudflare environment variable
+  const apiKey = env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_api_key_here') {
-    return res.status(500).json({ error: 'Missing API Key on server' });
+    return new Response(JSON.stringify({ error: 'Missing API Key on server' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
-    // Vercel automatically parses JSON bodies
-    const { handle, speed, energy, fuel } = req.body;
+    const body = await request.json();
+    const { handle, speed, energy, fuel } = body;
 
     const ai = new GoogleGenAI({ apiKey });
     
@@ -53,10 +61,16 @@ export default async function handler(req: any, res: any) {
     }
     
     const parsed = JSON.parse(response.text);
-    return res.status(200).json(parsed);
+    return new Response(JSON.stringify(parsed), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
 
   } catch (error: any) {
     console.error("AI Generation failed:", error);
-    return res.status(500).json({ error: error.message });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
