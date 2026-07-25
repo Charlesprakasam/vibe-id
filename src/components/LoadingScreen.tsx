@@ -6,18 +6,20 @@ export const LoadingScreen: React.FC = () => {
 
   useEffect(() => {
     const statuses = [
-      'Scanning aura...',
-      'Calculating chaos metrics...',
+      'Aligning your chakras...',
+      'Analyzing digital footprint...',
+      'Calculating unhinged energy...',
+      'Judging your Spotify Wrapped...',
       'Consulting the algorithm...',
-      'Vibe check in progress...',
-      'Almost there...'
+      'Finalizing your roast...',
+      'Vibe check almost complete...'
     ];
     
     let currentIndex = 0;
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % statuses.length;
       setStatus(statuses[currentIndex]);
-    }, 600);
+    }, 750);
 
     return () => clearInterval(interval);
   }, []);

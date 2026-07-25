@@ -17,8 +17,8 @@ const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.leng
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export async function generateVibeID(_handle: string, speed: string, energy: string, _fuel: string): Promise<VibeData> {
-  // Simulate network delay to keep the suspense of the loading screen
-  await new Promise(resolve => setTimeout(resolve, 2800));
+  // Simulate network delay to keep the suspense of the loading screen (5 seconds for ad monetization)
+  await new Promise(resolve => setTimeout(resolve, 5000));
 
   // Base stats influenced by their dropdown choices
   let chaos = getRandomInt(40, 60);
