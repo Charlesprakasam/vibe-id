@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Download, Sparkles, AlertTriangle, Link as LinkIcon } from 'lucide-react';
+import { Download, Sparkles, AlertTriangle, Share2 } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 import type { VibeData } from '../services/ai';
 
@@ -11,13 +11,10 @@ interface ResultCardProps {
 export const ResultCard: React.FC<ResultCardProps> = ({ data, onReset }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = async () => {
+  const handleSave = async () => {
     if (!cardRef.current) return;
     try {
-      const dataUrl = await htmlToImage.toPng(cardRef.current, { 
-        quality: 1.0,
-        pixelRatio: 2 // High res
-      });
+      const dataUrl = await htmlToImage.toPng(cardRef.current, { quality: 1.0, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `my-vibe-id.png`;
       link.href = dataUrl;
@@ -28,12 +25,30 @@ export const ResultCard: React.FC<ResultCardProps> = ({ data, onReset }) => {
     }
   };
 
-  const handleCopyLink = async () => {
+  const handleShare = async () => {
+    if (!cardRef.current) return;
     try {
-      await navigator.clipboard.writeText(window.location.href);
-      alert('App link copied to clipboard!');
+      const dataUrl = await htmlToImage.toPng(cardRef.current, { quality: 1.0, pixelRatio: 2 });
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], 'vibe-id.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'My Vibe ID',
+          text: 'Check out my Vibe ID! Generate yours here:',
+          url: window.location.href,
+          files: [file]
+        });
+      } else {
+        // Fallback for desktop or unsupported browsers
+        handleSave();
+      }
     } catch (err) {
-      console.error('Failed to copy', err);
+      console.error('Failed to share image', err);
+      if (err instanceof Error && err.name !== 'AbortError') {
+         alert('Failed to share image.');
+      }
     }
   };
 
@@ -116,20 +131,20 @@ export const ResultCard: React.FC<ResultCardProps> = ({ data, onReset }) => {
       </div>
 
       {/* Action Buttons (outside the card so they aren't in the image) */}
-      <div className="w-full mt-6 grid grid-cols-2 gap-3">
+      <div className="w-full mt-6 flex flex-col gap-3">
         <button 
-          onClick={handleDownload}
-          className="bg-white/10 hover:bg-white/20 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold"
+          onClick={handleShare}
+          className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-all font-black text-lg shadow-lg hover:shadow-pink-500/25 active:scale-95"
         >
-          <Download size={18} />
-          Save Image
+          <Share2 size={24} />
+          Share to Instagram
         </button>
         <button 
-          onClick={handleCopyLink}
-          className="bg-white/10 hover:bg-white/20 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold"
+          onClick={handleSave}
+          className="w-full bg-white/10 hover:bg-white/20 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold active:scale-95"
         >
-          <LinkIcon size={18} />
-          Copy Link
+          <Download size={18} />
+          Save Image Only
         </button>
       </div>
       
