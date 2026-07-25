@@ -1,3 +1,5 @@
+import { ARCHETYPES, ROASTS, SECRET_POWERS, RED_FLAGS } from './vibesDB';
+
 export interface VibeData {
   archetype: string;
   stats: {
@@ -11,66 +13,46 @@ export interface VibeData {
   redFlag: string;
 }
 
-const FALLBACK_VIBES: VibeData[] = [
-  {
-    archetype: "Chronically Online Overthinker",
-    stats: { chaos: 85, intuition: 90, energy: 30, sarcasm: 95 },
-    roast: "You probably know the latest TikTok drama better than you know your own relatives. Take a breath and touch some grass.",
-    secretPower: "Can find anyone's digital footprint in 3 minutes.",
-    redFlag: "Communicates entirely in hyper-specific memes."
-  },
-  {
-    archetype: "Chaotic Good Goblin",
-    stats: { chaos: 99, intuition: 60, energy: 85, sarcasm: 70 },
-    roast: "You run on pure adrenaline and bad decisions, but somehow it usually works out. Mostly.",
-    secretPower: "Creating wildly successful accidents.",
-    redFlag: "Has 47 open tabs and no intention of closing them."
-  },
-  {
-    archetype: "Matcha Fueled Perfectionist",
-    stats: { chaos: 20, intuition: 85, energy: 75, sarcasm: 60 },
-    roast: "Your aesthetic is pristine, but we both know your closet is a disaster zone. It's okay to make a typo sometimes.",
-    secretPower: "Color-coding their entire existence.",
-    redFlag: "Will judge your font choices."
-  },
-  {
-    archetype: "Mysterious Night Owl",
-    stats: { chaos: 60, intuition: 95, energy: 40, sarcasm: 80 },
-    roast: "You only thrive between the hours of 2 AM and 5 AM. Daylight is just a suggestion.",
-    secretPower: "Knowing things they shouldn't know.",
-    redFlag: "Takes 3-5 business days to reply to a text."
-  },
-  {
-    archetype: "Caffeinated Tornado",
-    stats: { chaos: 90, intuition: 40, energy: 100, sarcasm: 50 },
-    roast: "You've replaced water with pure caffeine. Please slow down, the rest of us can't keep up.",
-    secretPower: "Completing a week's worth of work in 2 hours.",
-    redFlag: "Bounces legs constantly under the table."
-  }
-];
+const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export async function generateVibeID(handle: string, speed: string, energy: string, fuel: string): Promise<VibeData> {
-  try {
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ handle, speed, energy, fuel })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return data as VibeData;
-    } else {
-      console.warn("Backend failed or not configured, using fallback data.");
-    }
-  } catch (error) {
-    console.error("AI Generation network request failed:", error);
+export async function generateVibeID(_handle: string, speed: string, energy: string, _fuel: string): Promise<VibeData> {
+  // Simulate network delay to keep the suspense of the loading screen
+  await new Promise(resolve => setTimeout(resolve, 2800));
+
+  // Base stats influenced by their dropdown choices
+  let chaos = getRandomInt(40, 60);
+  let energyStat = getRandomInt(40, 60);
+  let intuition = getRandomInt(40, 80);
+  let sarcasm = getRandomInt(50, 90);
+
+  // Adjust based on speed
+  if (speed.toLowerCase().includes('unhinged') || speed.toLowerCase().includes('fast')) {
+    chaos += getRandomInt(20, 40);
+  } else if (speed.toLowerCase().includes('slow') || speed.toLowerCase().includes('chill')) {
+    chaos -= getRandomInt(20, 30);
   }
 
-  // Fallback behavior if backend fails (e.g. running locally without Vercel CLI)
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  return FALLBACK_VIBES[Math.floor(Math.random() * FALLBACK_VIBES.length)];
+  // Adjust based on energy
+  if (energy.toLowerCase().includes('high') || energy.toLowerCase().includes('crack')) {
+    energyStat += getRandomInt(30, 40);
+  } else if (energy.toLowerCase().includes('low') || energy.toLowerCase().includes('sleep')) {
+    energyStat -= getRandomInt(20, 30);
+  }
+
+  // Ensure stats stay within 1-100 bounds
+  const clamp = (val: number) => Math.max(1, Math.min(100, val));
+
+  return {
+    archetype: getRandomItem(ARCHETYPES),
+    stats: {
+      chaos: clamp(chaos),
+      intuition: clamp(intuition),
+      energy: clamp(energyStat),
+      sarcasm: clamp(sarcasm)
+    },
+    roast: getRandomItem(ROASTS),
+    secretPower: getRandomItem(SECRET_POWERS),
+    redFlag: getRandomItem(RED_FLAGS)
+  };
 }
-
