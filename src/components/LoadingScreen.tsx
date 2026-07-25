@@ -36,17 +36,7 @@ export const LoadingScreen: React.FC = () => {
         {status}
       </h2>
 
-      {/* Ad Banner Container - Tactic 1 Monetization */}
-      <div className="mt-auto w-full">
-        <p className="text-xs text-gray-600 text-center mb-2 uppercase tracking-widest">Advertisement</p>
-        <div 
-          id="ad-banner-container" 
-          className="w-full h-[50px] bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden"
-        >
-          <span className="text-gray-500 text-sm">Ad Slot (320x50)</span>
-          {/* Monetag/AdMaven scripts would be inserted here */}
-        </div>
-      </div>
+      {/* Empty space removed because In-Page Push floats over the screen automatically */}
     </div>
   );
 };
